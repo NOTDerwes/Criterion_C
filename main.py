@@ -2,17 +2,35 @@ import tkinter as tk
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def create_graph():
-    num_nodes = int(num_nodes_input.get())
-    num_edges = int(num_edges_input.get())
-    graph_type = graph_type_input.get()
-    connected = int(connected_input.get())
 
-    if graph_type == "Полный":
+class Text:
+    def __init__(self, list_text, row, buttons=False, num_buttons=0, button_commands=[], error_is_possible=False, entry_is_blocked=False):
+        self.label = tk.Label(window, text=list_text[0])
+        self.entry = tk.Entry(window)
+        change_text(self.entry, list_text[1], entry_is_blocked)
+        if error_is_possible:
+            self.error_text = tk.Label(window, text=list_text[-1], fg="red")
+        if buttons:
+            self.buttons = []
+            for i in range(num_buttons):
+                button = tk.Button(window, text=list_text[2 + i], command=button_commands[i])
+                button.grid(row=row, column=i+2)
+                self.buttons.append(button)
+        self.label.grid(row=row, column=0)
+        self.entry.grid(row=row, column=1)
+
+
+def create_graph():
+    num_nodes = int(nodes.entry.get())
+    num_edges = int(edges.entry.get())
+    type = graph_type.entry.get()
+    connected = int(connection_components.entry.get())
+
+    if type == "Полный":
         G = nx.complete_graph(num_nodes)
-    elif graph_type == "Сетка":
+    elif type == "Сетка":
         G = nx.grid_2d_graph(num_nodes, num_nodes)
-    elif graph_type == "Дерево":
+    elif type == "Дерево":
         G = nx.random_tree(num_nodes)
     else:
         G = nx.Graph()
@@ -29,8 +47,9 @@ def create_graph():
         G = G.to_directed()
 
     pos = nx.spring_layout(G)
-    nx.draw(G, pos, with_labels=with_labels)
+    nx.draw(G, pos, with_labels=labels)
     plt.show()
+
 
 def error_check(obj, label, row, column, withzero=True):
     txt = obj.get()
@@ -50,6 +69,7 @@ def error_check(obj, label, row, column, withzero=True):
     label.grid_forget()
     return error
 
+
 def change_text(entry, text, blocked=False):
     unblock(entry)
     entry.delete(0, tk.END)
@@ -60,17 +80,17 @@ def change_text(entry, text, blocked=False):
 
 def possible_to_draw():
     impossible = False
-    edges = int(num_edges_input.get())
-    nodes = int(num_nodes_input.get())
-    connects = int(connected_input.get())
-    graph_type = graph_type_input.get()
-    if graph_type == "Случайный":
-        difference = nodes - connects + 1
-        if difference * (difference - 1) // 2 < edges:
+    num_edges = int(edges.entry.get())
+    num_nodes = int(nodes.entry.get())
+    connects = int(connection_components.entry.get())
+    type = graph_type.entry.get()
+    if type == "Случайный":
+        difference = num_nodes - connects + 1
+        if difference * (difference - 1) // 2 < num_edges:
             impossible = True
-        elif nodes - connects > edges:
+        elif num_nodes - connects > num_edges:
             impossible = True
-        elif connects > nodes:
+        elif connects > num_nodes:
             impossible = True
 
     if impossible:
@@ -79,149 +99,107 @@ def possible_to_draw():
     else:
         impossible_to_draw.grid_forget()
         create_button.grid(row=6, column=1)
+
+
 def block(obj):
     obj.configure(state="disabled")
+
 
 def unblock(obj):
     obj.configure(state="normal")
 
+
 def select_complete():
-    change_text(graph_type_input, "Полный", True)
-    n = num_nodes_input.get()
+    change_text(graph_type.entry, "Полный", True)
+    n = nodes.entry.get()
     if n.isdigit():
         n = int(n)
         s = str(n * (n - 1) // 2)
     else:
         s = "0"
 
-    change_text(num_edges_input, s, True)
-    change_text(connected_input, "1", True)
+    change_text(edges.entry, s, True)
+    change_text(connection_components.entry, "1", True)
+
 
 def select_random():
-    change_text(graph_type_input, "Случайный", True)
+    change_text(graph_type.entry, "Случайный", True)
+
 
 def select_grid():
-    num_nodes = int(num_nodes_input.get())
-    change_text(graph_type_input, "Сетка", True)
-    change_text(num_edges_input, str(2 * num_nodes * (num_nodes - 1)), True)
-    change_text(connected_input, "1", True)
+    num_nodes = int(nodes.entry.get())
+    change_text(graph_type.entry, "Сетка", True)
+    change_text(edges.entry, str(2 * num_nodes * (num_nodes - 1)), True)
+    change_text(connection_components.entry, "1", True)
 
 
 def select_tree():
-    change_text(graph_type_input, "Дерево", True)
-    change_text(num_edges_input, str(int(num_nodes_input.get()) - 1), True)
-    change_text(connected_input, "1", True)
+    change_text(graph_type.entry, "Дерево", True)
+    change_text(edges.entry, str(int(nodes.entry.get()) - 1), True)
+    change_text(connection_components.entry, "1", True)
+
 
 def select_with_labels():
-    global with_labels
-    change_text(graph_with_labels_input, "Да", True)
-    with_labels = True
+    global labels
+    change_text(graph_with_labels.entry, "Да", True)
+    labels = True
+
 
 def select_without_labels():
-    global with_labels
-    change_text(graph_with_labels_input, "Нет", True)
-    with_labels = False
+    global labels
+    change_text(graph_with_labels.entry, "Нет", True)
+    labels = False
+
 
 def select_directed():
     global graph_is_directed
-    change_text(is_directed_input, "Да", True)
+    change_text(directed_graph.entry, "Да", True)
     graph_is_directed = True
+
 
 def select_not_directed():
     global graph_is_directed
-    change_text(is_directed_input, "Нет", True)
+    change_text(directed_graph.entry, "Нет", True)
     graph_is_directed = False
 
+
 def update():
-    if error_check(num_nodes_input, num_nodes_error, 0, 1, False) and error_check(num_edges_input, num_edges_error, 1, 1) and error_check(connected_input, connected_input_error, 3, 1, False):
-        graph_type = graph_type_input.get()
-        if graph_type == "Полный":
+    if error_check(nodes.entry, nodes.error_text, 0, 1, False) and error_check(edges.entry, edges.error_text, 1, 1) and error_check(connection_components.entry, connection_components.error_text, 3, 1, False):
+        type = graph_type.entry.get()
+        if type == "Полный":
             select_complete()
-        elif graph_type == "Дерево":
+        elif type == "Дерево":
             select_tree()
-        elif graph_type == "Сетка":
+        elif type == "Сетка":
             select_grid()
         else:
-            unblock(num_edges_input)
-            unblock(connected_input)
+            unblock(edges.entry)
+            unblock(connection_components.entry)
         possible_to_draw()
 
     window.after(500, update)
 
-with_labels = False
+labels = False
 graph_is_directed = False
 
 # Создать окно
 window = tk.Tk()
 window.title("Визуализация графа")
 
-# Создать элементы меню
-num_nodes_label = tk.Label(window, text="Количество вершин:")
-num_nodes_input = tk.Entry(window)
-num_nodes_input.insert(0, "10")
-num_nodes_error = tk.Label(window, text="Введите натуральное число", fg="red")
+nodes = Text(["Количество вершин:", "10", "Введите натуральное число"], 0, error_is_possible=True)
 
-num_edges_label = tk.Label(window, text="Количество ребер:")
-num_edges_input = tk.Entry(window)
-num_edges_input.insert(0, "20")
-num_edges_error = tk.Label(window, text="Введите целое неотрицательное число", fg="red")
+edges = Text(["Количество ребер:", "20", "Введите целое неотрицательное число"], 1, error_is_possible=True)
 
-graph_type_label = tk.Label(window, text="Тип графа:")
-graph_type_input = tk.Entry(window)
-graph_type_button_complete = tk.Button(window, text="Полный", command=select_complete)
-graph_type_button_random = tk.Button(window, text="Случайный", command=select_random)
-graph_type_button_grid = tk.Button(window, text="Сетка", command=select_grid)
-graph_type_button_tree = tk.Button(window, text="Дерево", command=select_tree)
-change_text(graph_type_input, "Случайный", True)
+graph_type = Text(["Тип графа:", "Случайный", "Случайный", "Полный", "Сетка", "Дерево"], 2, True, 4, [select_random, select_complete, select_grid, select_tree], False, True)
 
-graph_with_labels_label = tk.Label(window, text="Вершины пронумерованы:")
-graph_with_labels_input = tk.Entry(window)
-graph_with_labels_button = tk.Button(window, text="Да", command=select_with_labels)
-graph_without_labels_button = tk.Button(window, text="Нет", command=select_without_labels)
-change_text(graph_with_labels_input, "Нет", True)
+connection_components = Text(["Компонент связности:", "1", "Введите натуральное число"], 3, error_is_possible=True)
 
-connected_label = tk.Label(window, text="Компонент связности:")
-connected_input = tk.Entry(window)
-connected_input.insert(0, "1")
-connected_input_error = tk.Label(window, text="Введите натуральное число", fg="red")
+graph_with_labels = Text(["Вершины пронумерованы:", "Нет", "Да", "Нет"], 4, True, 2, [select_with_labels, select_without_labels], entry_is_blocked=True)
 
-is_directed_label = tk.Label(window, text="Граф ориентирован:")
-is_directed_input = tk.Entry(window)
-is_directed_button = tk.Button(window, text="Да", command=select_directed)
-not_directed_button = tk.Button(window, text="Нет", command=select_not_directed)
-change_text(is_directed_input, "Нет", True)
+directed_graph = Text(["Граф ориентирован:", "Нет", "Да", "Нет"], 5, True, 2, [select_directed, select_not_directed], entry_is_blocked=True)
 
 create_button = tk.Button(window, text="Создать граф", command=create_graph)
 impossible_to_draw = tk.Label(window, text="Невозможно нарисовать данный граф", fg="red")
-
-# Разместить элементы меню на окне
-num_nodes_label.grid(row=0, column=0)
-num_nodes_input.grid(row=0, column=1)
-
-num_edges_label.grid(row=1, column=0)
-num_edges_input.grid(row=1, column=1)
-
-graph_type_label.grid(row=2, column=0)
-graph_type_input.grid(row=2, column=1)
-
-graph_type_button_complete.grid(row=2, column=2)
-graph_type_button_random.grid(row=2, column=3)
-graph_type_button_grid.grid(row=2, column=4)
-graph_type_button_tree.grid(row=2, column=5)
-
-connected_label.grid(row=3, column=0)
-connected_input.grid(row=3, column=1)
-
-graph_with_labels_label.grid(row=4, column=0)
-graph_with_labels_input.grid(row=4, column=1)
-graph_with_labels_button.grid(row=4, column=2)
-graph_without_labels_button.grid(row=4, column=3)
-
-is_directed_label.grid(row=5, column=0)
-is_directed_input.grid(row=5, column=1)
-is_directed_button.grid(row=5, column=2)
-not_directed_button.grid(row=5, column=3)
-
 create_button.grid(row=6, column=1)
 
 
