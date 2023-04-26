@@ -33,8 +33,6 @@ def create_graph():
 
     if type_of_graph == "Полный":
         graph = nx.complete_graph(num_nodes)
-    elif type_of_graph == "Сетка":
-        graph = nx.grid_2d_graph(num_nodes, num_nodes)
     elif type_of_graph == "Дерево":
         graph = nx.random_tree(num_nodes)
     else:
@@ -122,25 +120,17 @@ def unblock(obj):
 # Команда, выполняющаяся при выборе типа графа "Полный"
 def select_complete():
     change_text(graph_type.entry, "Полный", True)
-    n = nodes.entry.get()
-    n = int(n)
-    s = str(n * (n - 1) // 2)
+    num_nodes = nodes.entry.get()
+    num_nodes = int(num_nodes)
+    string_nodes = str(num_nodes * (num_nodes - 1) // 2)
 
-    change_text(edges.entry, s, True)
+    change_text(edges.entry, string_nodes, True)
     change_text(connection_components.entry, "1", True)
 
 
 # Команда, выполняющаяся при выборе типа графа "Дерево"
 def select_random():
     change_text(graph_type.entry, "Случайный", True)
-
-
-# Команда, выполняющаяся при выборе типа графа "Сетка"
-def select_grid():
-    num_nodes = int(nodes.entry.get())
-    change_text(graph_type.entry, "Сетка", True)
-    change_text(edges.entry, str(2 * num_nodes * (num_nodes - 1)), True)
-    change_text(connection_components.entry, "1", True)
 
 
 # Команда, выполняющаяся при выборе типа графа "Дерево"
@@ -192,8 +182,6 @@ def update():
             select_complete()
         elif type_of_graph == "Дерево":
             select_tree()
-        elif type_of_graph == "Сетка":
-            select_grid()
         else:
             unblock(edges.entry)
             unblock(connection_components.entry)
@@ -218,15 +206,15 @@ nodes = Text(["Количество вершин:", "10", "Введите нат
 
 edges = Text(["Количество ребер:", "20", "Введите целое неотрицательное число"], 1, error_is_possible=True)
 
-graph_type = Text(["Тип графа:", "Случайный", "Случайный", "Полный", "Сетка", "Дерево"], 2, True, 4,
-                  [select_random, select_complete, select_grid, select_tree], False, True)
+graph_type = Text(["Тип графа:", "Случайный", "Случайный", "Полный", "Дерево"], 2, True, 3,
+                  [select_random, select_complete, select_tree], False, True)
 
 connection_components = Text(["Компонент связности:", "1", "Введите натуральное число"], 3, error_is_possible=True)
 
-graph_with_labels = Text(["Вершины пронумерованы:", "Нет", "Да", "Нет"], 4, True, 2,
+graph_with_labels = Text(["Граф помеченный:", "Нет", "Да", "Нет"], 4, True, 2,
                          [select_with_labels, select_without_labels], entry_is_blocked=True)
 
-directed_graph = Text(["Граф ориентирован:", "Нет", "Да", "Нет"], 5, True, 2, [select_directed, select_not_directed],
+directed_graph = Text(["Граф ориентированный:", "Нет", "Да", "Нет"], 5, True, 2, [select_directed, select_not_directed],
                       entry_is_blocked=True)
 
 # Создание и визуализация кнопки, отвечающей за созание графа
